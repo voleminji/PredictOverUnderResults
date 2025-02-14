@@ -3,10 +3,10 @@ import random
 # Hàm yêu cầu người dùng nhập lịch sử kết quả
 def get_history_from_js():
     history = []
-    print("Nhập 12 kết quả gần nhất của tài/xỉu (0 = Xỉu, 1 = Tài):")
-    for i in range(1, 13):
+    print("Nhập 13 kết quả gần nhất của tài/xỉu (0 = Xỉu, 1 = Tài):")
+    for i in range(1, 14):
         while True:
-            data = input(f"Nhập kết quả {i}/12 (0 hoặc 1): ")
+            data = input(f"Nhập kết quả {i}/13 (0 hoặc 1): ")
             if data in ['0', '1']:
                 history.append(int(data))
                 break
@@ -16,64 +16,86 @@ def get_history_from_js():
 
 # Hàm phát hiện mẫu trong dữ liệu lịch sử
 def detect_pattern(history):
-    if len(history) < 12:
+    if len(history) < 13:
         return None
     
-    last_12 = ''.join(map(str, history[-12:]))
+    last_13 = ''.join(map(str, history[-13:]))
     
-    # Danh sách mẫu phổ biến
+    # Danh sách mẫu phổ biến cập nhật
     common_patterns = {
-        "111111111111": "Xỉu", "000000000000": "Tài", 
-        "101010101010": "Tài", "010101010101": "Xỉu", 
-        "110011001100": "Xỉu", "001100110011": "Tài", 
-        "111000111000": "Xỉu", "000111000111": "Tài",
-        "100100100100": "Xỉu", "011011011011": "Tài", 
-        "110101101011": "Xỉu", "001010010100": "Tài", 
-        "111001110011": "Xỉu", "000110001100": "Tài", 
-        "101110111011": "Xỉu", "010001000100": "Tài",
-        "100101001010": "Xỉu", "011010110101": "Tài",
-        "110110011001": "Xỉu", "001001100110": "Tài",
-        "101011110111": "Xỉu", "010100001000": "Tài",
-        "111010011100": "Xỉu", "000101100011": "Tài",
-        "100110110011": "Xỉu", "011001001100": "Tài",
-        "110100101001": "Xỉu", "001011010110": "Tài",
-        "101001010010": "Xỉu", "010110101101": "Tài",
-        "111100000011": "Xỉu", "000011111100": "Tài",
-        "110010101110": "Xỉu", "001101010001": "Tài",
-        "101101100011": "Xỉu", "010010011100": "Tài",
-        "100011110101": "Xỉu", "011100001010": "Tài",
-        "111000100011": "Xỉu", "000111011100": "Tài",
-        "110011101100": "Xỉu", "001100010011": "Tài",
+        "1111111111111": "Xỉu", "0000000000000": "Tài", 
+        "1010101010101": "Tài", "0101010101010": "Xỉu", 
+        "1100110011001": "Xỉu", "0011001100110": "Tài", 
+        "1110001110001": "Xỉu", "0001110001110": "Tài",
+        "1001001001001": "Xỉu", "0110110110110": "Tài", 
+        "1101011010110": "Xỉu", "0010100101001": "Tài", 
+        "1010101101011": "Tài", "0101010010100": "Xỉu", 
+        "1101101101101": "Xỉu", "0010010010010": "Tài", 
+        "1011001011001": "Xỉu", "0100110100110": "Tài", 
+        "1110000001110": "Xỉu", "0001111110001": "Tài", 
+        "1010011010011": "Xỉu", "0101100101100": "Tài", 
+        "1100101100101": "Xỉu", "0011010011010": "Tài", 
+        "1001101001101": "Xỉu", "0110010110010": "Tài", 
+        "1010100110111": "Tài", "0101011001000": "Xỉu", 
+        "1111000111101": "Xỉu", "0000111000010": "Tài", 
+        "1101010001011": "Xỉu", "0010101110100": "Tài", 
+        "1010110110001": "Xỉu", "0101001001110": "Tài", 
+        "1001110001101": "Xỉu", "0110001110010": "Tài",
+        "1110101010110": "Xỉu", "0001010101001": "Tài",
+        "1101101010001": "Xỉu", "0010010101110": "Tài",
+        "1011010111001": "Xỉu", "0100101000110": "Tài",
+        "1110111100001": "Xỉu", "0001000011110": "Tài",
+        "1100101011001": "Xỉu", "0011010100110": "Tài"
     }
 
-    return common_patterns.get(last_12, None)
+    return common_patterns.get(last_13, None)
 
-# Hàm dự đoán tài xỉu
+# Hàm dự đoán tài xỉu và xác suất xúc xắc
 def predict_tai_xiu(history):
     if not history:
-        return random.choice(["Tài", "Xỉu"])
+        return random.choice(["Tài", "Xỉu"]), (3, 18)
     
     # Kiểm tra mẫu xuất hiện
     pattern_prediction = detect_pattern(history)
     if pattern_prediction:
-        return pattern_prediction
+        return pattern_prediction, (3, 18)
     
-    # Tính toán xác suất
-    last_results = history[-12:]
-    probability = sum(last_results) / len(last_results)
+    # Tính toán xác suất có trọng số động
+    last_results = history[-13:]
+    weights = [1.3 ** i for i in range(1, 14)]  # Trọng số động mạnh hơn để phản ứng nhanh
+    weighted_sum = sum(val * weight for val, weight in zip(last_results, weights))
+    probability = weighted_sum / sum(weights)
     
-    # Kiểm tra chuỗi liên tục
-    if history[-6:].count(1) == 6:
-        return "Xỉu"
-    elif history[-6:].count(0) == 6:
-        return "Tài"
+    # Xác suất kết quả xúc xắc
+    dice_range = (3, 10) if probability < 0.5 else (11, 18)
     
-    return "Tài" if probability > 0.55 else "Xỉu"
+    # Kiểm tra xu hướng cầu dài
+    if history[-13:].count(1) >= 10:
+        return "Xỉu", (3, 10)
+    elif history[-13:].count(0) >= 10:
+        return "Tài", (11, 18)
+    
+    # Kiểm tra bẻ cầu nhanh (nhà cái can thiệp)
+    if history[-8:] == [1, 0] * 4 or history[-8:] == [0, 1] * 4:
+        return "Bẻ cầu - đổi chiến thuật", (3, 18)
+    
+    # Nhận diện cầu đảo và nhảy cầu
+    if history[-6:] in [[1, 1, 0, 0, 1, 1], [0, 0, 1, 1, 0, 0]]:
+        return "Cầu đảo", (3, 18)
+    elif history[-6:] in [[1, 0, 1, 1, 0, 1], [0, 1, 0, 0, 1, 0]]:
+        return "Nhảy cầu", (3, 18)
+    
+    # Nhận diện cầu ngược (Anti-pattern)
+    if history[-5:] in [[1, 1, 1, 0, 0], [0, 0, 0, 1, 1]]:
+        return "Cầu ngược", (3, 18)
+    
+    return ("Tài", dice_range) if probability > 0.55 else ("Xỉu", dice_range)
 
 # Chạy chương trình
 if __name__ == "__main__":
     history = get_history_from_js()
-    prediction = predict_tai_xiu(history)
+    prediction, dice_range = predict_tai_xiu(history)
     print(f"Dự đoán kết quả tiếp theo: {prediction}")
+    print(f"Xác suất xúc xắc có thể ra từ: {dice_range[0]} đến {dice_range[1]}")
     print(f"Lịch sử gần đây: {history}")
-    print("Tool by @vsk111")
+    print("Tool by SunWinClub")
